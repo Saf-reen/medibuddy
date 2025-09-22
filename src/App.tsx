@@ -43,34 +43,44 @@ const DashboardContent: React.FC = () => {
   return (
     <div className="min-h-screen bg-gray-50">
       {/* Header */}
-      <header className="bg-white shadow-sm border-b">
+      <header className="bg-white shadow-sm border-b border-gray-200">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex items-center justify-between h-16">
             <div className="flex items-center space-x-3">
-              <div className="w-8 h-8 bg-blue-600 rounded-lg flex items-center justify-center">
+              <div className="w-8 h-8 bg-gradient-to-r from-green-400 to-blue-500 rounded-lg flex items-center justify-center">
                 <TrendingUp className="w-5 h-5 text-white" />
               </div>
               <div>
-                <h1 className="text-xl font-bold text-gray-900">CryptoDash</h1>
-                <p className="text-sm text-gray-500">Real-time cryptocurrency market data</p>
+                <h1 className="text-xl font-bold text-gray-900">CoinGecko</h1>
+                <p className="text-sm text-gray-500">Cryptocurrency Prices & Market Data</p>
               </div>
             </div>
             
-            <button
-              onClick={handleRefresh}
-              disabled={isRefreshing}
-              className="inline-flex items-center space-x-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
-            >
-              <RefreshCw className={`w-4 h-4 ${isRefreshing ? 'animate-spin' : ''}`} />
-              <span>Refresh</span>
-            </button>
+            <div className="flex items-center space-x-4">
+              <nav className="hidden md:flex items-center space-x-6">
+                <a href="#" className="text-gray-600 hover:text-gray-900 text-sm font-medium">Cryptocurrencies</a>
+                <a href="#" className="text-gray-600 hover:text-gray-900 text-sm font-medium">Exchanges</a>
+                <a href="#" className="text-gray-600 hover:text-gray-900 text-sm font-medium">NFT</a>
+                <a href="#" className="text-gray-600 hover:text-gray-900 text-sm font-medium">Learn</a>
+                <a href="#" className="text-gray-600 hover:text-gray-900 text-sm font-medium">Products</a>
+              </nav>
+              
+              <button
+                onClick={handleRefresh}
+                disabled={isRefreshing}
+                className="inline-flex items-center space-x-2 px-3 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors text-sm"
+              >
+                <RefreshCw className={`w-4 h-4 ${isRefreshing ? 'animate-spin' : ''}`} />
+                <span>Refresh</span>
+              </button>
+            </div>
           </div>
         </div>
       </header>
 
       {/* Main Content */}
       <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        <HighlightsSection />
+        <HighlightsSection onCoinSelect={handleCoinSelect} />
         <CoinsTable onCoinSelect={handleCoinSelect} />
       </main>
 
@@ -82,7 +92,7 @@ const DashboardContent: React.FC = () => {
       />
 
       {/* Footer */}
-      <footer className="bg-white border-t mt-16">
+      <footer className="bg-white border-t border-gray-200 mt-16">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
           <div className="text-center space-y-4">
             <p className="text-gray-600">
@@ -91,7 +101,7 @@ const DashboardContent: React.FC = () => {
                 href="https://www.coingecko.com"
                 target="_blank"
                 rel="noopener noreferrer"
-                className="text-blue-600 hover:text-blue-700 font-medium"
+                className="text-green-600 hover:text-green-700 font-medium"
               >
                 CoinGecko API
               </a>

@@ -1,5 +1,5 @@
 import React, { useState, useMemo } from 'react';
-import { ChevronUp, ChevronDown, Eye } from 'lucide-react';
+import { ChevronUp, ChevronDown, Eye, Star } from 'lucide-react';
 import { useCryptoData } from '../hooks/useCryptoData';
 import { SearchInput } from './ui/SearchInput';
 import { TableLoadingSkeleton } from './ui/LoadingSkeleton';
@@ -86,13 +86,16 @@ export const CoinsTable: React.FC<CoinsTableProps> = ({ onCoinSelect }) => {
     return `${value >= 0 ? '+' : ''}${value.toFixed(2)}%`;
   };
 
-  const SortButton: React.FC<{ field: SortField; children: React.ReactNode }> = ({ 
+  const SortButton: React.FC<{ field: SortField; children: React.ReactNode; align?: 'left' | 'right' }> = ({ 
     field, 
-    children 
+    children,
+    align = 'left'
   }) => (
     <button
       onClick={() => handleSort(field)}
-      className="flex items-center space-x-1 text-left hover:text-blue-600 transition-colors"
+      className={`flex items-center space-x-1 hover:text-blue-600 transition-colors ${
+        align === 'right' ? 'justify-end' : 'justify-start'
+      }`}
     >
       <span>{children}</span>
       <div className="flex flex-col">
@@ -114,10 +117,68 @@ export const CoinsTable: React.FC<CoinsTableProps> = ({ onCoinSelect }) => {
     </button>
   );
 
+  const totalMarketCap = coins?.reduce((sum, coin) => sum + (coin.market_cap || 0), 0) || 0;
+  const totalVolume = coins?.reduce((sum, coin) => sum + (coin.total_volume || 0), 0) || 0;
+
   return (
     <section>
+      {/* Market Overview */}
+      <div className="bg-white rounded-lg border border-gray-200 p-6 mb-6">
+        <div className="flex items-center justify-between mb-4">
+          <h2 className="text-xl font-bold text-gray-900">Cryptocurrency Prices by Market Cap</h2>
+          <div className="flex items-center space-x-2">
+            <span className="text-sm text-gray-500">Highlights</span>
+            <div className="w-8 h-4 bg-green-500 rounded-full relative">
+              <div className="w-3 h-3 bg-white rounded-full absolute right-0.5 top-0.5"></div>
+            </div>
+          </div>
+        </div>
+        
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-4">
+          <div>
+            <div className="text-2xl font-bold text-gray-900">
+              {formatCurrency(totalMarketCap)}
+            </div>
+            <div className="text-sm text-gray-500">Market Cap +1.2%</div>
+          </div>
+          <div>
+            <div className="text-2xl font-bold text-gray-900">
+              {formatCurrency(totalVolume)}
+            </div>
+            <div className="text-sm text-gray-500">24h Trading Volume</div>
+          </div>
+        </div>
+
+        <p className="text-sm text-gray-600">
+          The global cryptocurrency market cap today is {formatCurrency(totalMarketCap)}, a 1.2% change in the last 24 hours.{' '}
+          <button className="text-blue-600 hover:text-blue-700">Read more</button>
+        </p>
+      </div>
+
+      {/* Table Controls */}
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between mb-6">
-        <h2 className="text-2xl font-bold text-gray-900 mb-4 sm:mb-0">All Cryptocurrencies</h2>
+        <div className="flex items-center space-x-4 mb-4 sm:mb-0">
+          <div className="flex items-center space-x-2 text-sm">
+            <button className="px-3 py-1 bg-gray-100 text-gray-700 rounded-md hover:bg-gray-200 transition-colors">
+              🔥 All
+            </button>
+            <button className="px-3 py-1 text-gray-600 hover:bg-gray-100 rounded-md transition-colors">
+              📊 Highlights
+            </button>
+            <button className="px-3 py-1 text-gray-600 hover:bg-gray-100 rounded-md transition-colors">
+              📂 Categories
+            </button>
+            <button className="px-3 py-1 text-gray-600 hover:bg-gray-100 rounded-md transition-colors">
+              ⚡ Energy
+            </button>
+            <button className="px-3 py-1 text-gray-600 hover:bg-gray-100 rounded-md transition-colors">
+              💰 Binance Wallet (30)
+            </button>
+            <button className="px-3 py-1 text-gray-600 hover:bg-gray-100 rounded-md transition-colors">
+              🚀 Launchpad
+            </button>
+          </div>
+        </div>
         <div className="flex items-center space-x-4">
           <SearchInput
             value={searchQuery}
@@ -125,9 +186,9 @@ export const CoinsTable: React.FC<CoinsTableProps> = ({ onCoinSelect }) => {
             placeholder="Search by name or symbol..."
             className="w-64"
           />
-          <div className="text-sm text-gray-500">
-            Page {currentPage} • {filteredAndSortedCoins.length} coins
-          </div>
+          <button className="text-gray-600 hover:text-gray-800 transition-colors">
+            ⚙️ Customize
+          </button>
         </div>
       </div>
 
@@ -150,49 +211,55 @@ export const CoinsTable: React.FC<CoinsTableProps> = ({ onCoinSelect }) => {
 
       {!isLoading && !error && filteredAndSortedCoins.length > 0 && (
         <>
-          <div className="bg-white rounded-lg shadow-sm border overflow-hidden">
+          <div className="bg-white rounded-lg border border-gray-200 overflow-hidden">
             <div className="overflow-x-auto">
-              <table className="min-w-full divide-y divide-gray-200">
-                <thead className="bg-gray-50">
+              <table className="min-w-full">
+                <thead className="bg-gray-50 border-b border-gray-200">
                   <tr>
                     <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                      <SortButton field="market_cap_rank">Rank</SortButton>
+                      <Star className="w-4 h-4" />
                     </th>
                     <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                      Name
+                      <SortButton field="market_cap_rank">#</SortButton>
+                    </th>
+                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                      Coin
                     </th>
                     <th className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
-                      <div className="flex justify-end">
-                        <SortButton field="current_price">Price</SortButton>
-                      </div>
+                      <SortButton field="current_price" align="right">Price</SortButton>
                     </th>
                     <th className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
-                      <div className="flex justify-end">
-                        <SortButton field="price_change_percentage_24h">24h Change</SortButton>
-                      </div>
+                      <SortButton field="price_change_percentage_24h" align="right">1h</SortButton>
                     </th>
                     <th className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
-                      <div className="flex justify-end">
-                        <SortButton field="market_cap">Market Cap</SortButton>
-                      </div>
+                      <SortButton field="price_change_percentage_24h" align="right">24h</SortButton>
                     </th>
                     <th className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
-                      <div className="flex justify-end">
-                        <SortButton field="total_volume">Volume (24h)</SortButton>
-                      </div>
+                      7d
+                    </th>
+                    <th className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
+                      <SortButton field="total_volume" align="right">24h Volume</SortButton>
+                    </th>
+                    <th className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
+                      <SortButton field="market_cap" align="right">Market Cap</SortButton>
                     </th>
                     <th className="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">
-                      Actions
+                      Last 7 Days
                     </th>
                   </tr>
                 </thead>
-                <tbody className="bg-white divide-y divide-gray-200">
+                <tbody className="bg-white divide-y divide-gray-100">
                   {filteredAndSortedCoins.map((coin) => (
                     <tr 
                       key={coin.id} 
                       className="hover:bg-gray-50 transition-colors cursor-pointer"
                       onClick={() => onCoinSelect(coin.id)}
                     >
+                      <td className="px-6 py-4 whitespace-nowrap">
+                        <button className="text-gray-400 hover:text-yellow-500 transition-colors">
+                          <Star className="w-4 h-4" />
+                        </button>
+                      </td>
                       <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
                         {coin.market_cap_rank || 'N/A'}
                       </td>
@@ -201,10 +268,10 @@ export const CoinsTable: React.FC<CoinsTableProps> = ({ onCoinSelect }) => {
                           <img
                             src={coin.image}
                             alt={coin.name}
-                            className="w-8 h-8 rounded-full mr-3"
+                            className="w-6 h-6 rounded-full mr-3"
                             onError={(e) => {
                               const target = e.target as HTMLImageElement;
-                              target.src = 'https://via.placeholder.com/32?text=?';
+                              target.src = 'https://via.placeholder.com/24?text=?';
                             }}
                           />
                           <div>
@@ -221,39 +288,30 @@ export const CoinsTable: React.FC<CoinsTableProps> = ({ onCoinSelect }) => {
                         {formatCurrency(coin.current_price)}
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap text-right text-sm">
-                        <div className="flex flex-col items-end">
-                          <span className={`font-medium ${
-                            (coin.price_change_percentage_24h || 0) >= 0 
-                              ? 'text-green-600' 
-                              : 'text-red-600'
-                          }`}>
-                            {formatPercentage(coin.price_change_percentage_24h)}
-                          </span>
-                          <span className={`text-xs ${
-                            (coin.price_change_24h || 0) >= 0 
-                              ? 'text-green-500' 
-                              : 'text-red-500'
-                          }`}>
-                            {formatCurrency(coin.price_change_24h)}
-                          </span>
-                        </div>
+                        <span className="text-gray-500">-</span>
                       </td>
-                      <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium text-gray-900">
-                        {formatNumber(coin.market_cap)}
+                      <td className="px-6 py-4 whitespace-nowrap text-right text-sm">
+                        <span className={`font-medium ${
+                          (coin.price_change_percentage_24h || 0) >= 0 
+                            ? 'text-green-600' 
+                            : 'text-red-600'
+                        }`}>
+                          {formatPercentage(coin.price_change_percentage_24h)}
+                        </span>
+                      </td>
+                      <td className="px-6 py-4 whitespace-nowrap text-right text-sm">
+                        <span className="text-gray-500">-</span>
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium text-gray-900">
                         {formatNumber(coin.total_volume)}
                       </td>
+                      <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium text-gray-900">
+                        {formatNumber(coin.market_cap)}
+                      </td>
                       <td className="px-6 py-4 whitespace-nowrap text-center">
-                        <button
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            onCoinSelect(coin.id);
-                          }}
-                          className="text-blue-600 hover:text-blue-900 transition-colors"
-                        >
-                          <Eye className="w-4 h-4" />
-                        </button>
+                        <div className="w-20 h-8 bg-gray-100 rounded flex items-center justify-center">
+                          <span className="text-xs text-gray-500">Chart</span>
+                        </div>
                       </td>
                     </tr>
                   ))}
@@ -273,7 +331,7 @@ export const CoinsTable: React.FC<CoinsTableProps> = ({ onCoinSelect }) => {
             </button>
             
             <span className="text-sm text-gray-600">
-              Page {currentPage}
+              Page {currentPage} • Showing {filteredAndSortedCoins.length} coins
             </span>
             
             <button
