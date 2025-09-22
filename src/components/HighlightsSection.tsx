@@ -1,6 +1,6 @@
 import React from 'react';
 import { useTrendingCoins } from '../hooks/useCryptoData';
-import { HighlightCard } from './HighlightCard';
+import { HighlightCard } from './HighlightCards';
 
 interface HighlightsSectionProps {
   onCoinSelect: (coinId: string) => void;
