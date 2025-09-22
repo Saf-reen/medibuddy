@@ -5,6 +5,7 @@ import { HighlightsSection } from './components/HighlightsSection';
 import { CoinsTable } from './components/CoinsTable';
 import { CoinModal } from './components/CoinModal';
 import { useInvalidateQueries } from './hooks/useCryptoData';
+import { TabNavigation } from './components/TabNavigation';
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -15,10 +16,20 @@ const queryClient = new QueryClient({
   },
 });
 
+const tabs = [
+  { id: 'all', label: 'All', icon: <span>🔥</span> },
+  { id: 'highlights', label: 'Highlights', icon: <span>📊</span> },
+  { id: 'categories', label: 'Categories', icon: <span>📂</span> },
+  { id: 'energy', label: 'Energy', icon: <span>⚡</span> },
+  { id: 'binance', label: 'Binance Wallet', icon: <span>💰</span> },
+  { id: 'launchpad', label: 'Launchpad', icon: <span>🚀</span> },
+];
+
 const DashboardContent: React.FC = () => {
   const [selectedCoinId, setSelectedCoinId] = useState<string | null>(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isRefreshing, setIsRefreshing] = useState(false);
+  const [activeTab, setActiveTab] = useState('all');
   const { invalidateCoins, invalidateTrending } = useInvalidateQueries();
 
   const handleCoinSelect = (coinId: string) => {
@@ -33,21 +44,18 @@ const DashboardContent: React.FC = () => {
 
   const handleRefresh = async () => {
     setIsRefreshing(true);
-    await Promise.all([
-      invalidateCoins(),
-      invalidateTrending(),
-    ]);
+    await Promise.all([invalidateCoins(), invalidateTrending()]);
     setTimeout(() => setIsRefreshing(false), 1000);
   };
 
   return (
     <div className="min-h-screen bg-gray-50">
       {/* Header */}
-      <header className="bg-white shadow-sm border-b border-gray-200">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <header className="bg-white border-b border-gray-200 shadow-sm">
+        <div className="px-4 mx-auto max-w-7xl sm:px-6 lg:px-8">
           <div className="flex items-center justify-between h-16">
             <div className="flex items-center space-x-3">
-              <div className="w-8 h-8 bg-gradient-to-r from-green-400 to-blue-500 rounded-lg flex items-center justify-center">
+              <div className="flex items-center justify-center w-8 h-8 rounded-lg bg-gradient-to-r from-green-400 to-blue-500">
                 <TrendingUp className="w-5 h-5 text-white" />
               </div>
               <div>
@@ -55,20 +63,20 @@ const DashboardContent: React.FC = () => {
                 <p className="text-sm text-gray-500">Cryptocurrency Prices & Market Data</p>
               </div>
             </div>
-            
+
             <div className="flex items-center space-x-4">
-              <nav className="hidden md:flex items-center space-x-6">
-                <a href="#" className="text-gray-600 hover:text-gray-900 text-sm font-medium">Cryptocurrencies</a>
-                <a href="#" className="text-gray-600 hover:text-gray-900 text-sm font-medium">Exchanges</a>
-                <a href="#" className="text-gray-600 hover:text-gray-900 text-sm font-medium">NFT</a>
-                <a href="#" className="text-gray-600 hover:text-gray-900 text-sm font-medium">Learn</a>
-                <a href="#" className="text-gray-600 hover:text-gray-900 text-sm font-medium">Products</a>
+              <nav className="items-center hidden space-x-6 md:flex">
+                <a href="#" className="text-sm font-medium text-gray-600 hover:text-gray-900">Cryptocurrencies</a>
+                <a href="#" className="text-sm font-medium text-gray-600 hover:text-gray-900">Exchanges</a>
+                <a href="#" className="text-sm font-medium text-gray-600 hover:text-gray-900">NFT</a>
+                <a href="#" className="text-sm font-medium text-gray-600 hover:text-gray-900">Learn</a>
+                <a href="#" className="text-sm font-medium text-gray-600 hover:text-gray-900">Products</a>
               </nav>
-              
+
               <button
                 onClick={handleRefresh}
                 disabled={isRefreshing}
-                className="inline-flex items-center space-x-2 px-3 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors text-sm"
+                className="inline-flex items-center px-3 py-2 space-x-2 text-sm text-white transition-colors bg-green-600 rounded-lg hover:bg-green-700 disabled:opacity-50 disabled:cursor-not-allowed"
               >
                 <RefreshCw className={`w-4 h-4 ${isRefreshing ? 'animate-spin' : ''}`} />
                 <span>Refresh</span>
@@ -79,9 +87,12 @@ const DashboardContent: React.FC = () => {
       </header>
 
       {/* Main Content */}
-      <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        <HighlightsSection onCoinSelect={handleCoinSelect} />
-        <CoinsTable onCoinSelect={handleCoinSelect} />
+      <main className="px-4 py-8 mx-auto max-w-7xl sm:px-6 lg:px-8">
+        <TabNavigation tabs={tabs} activeTab={activeTab} onTabChange={setActiveTab} />
+
+        {activeTab === 'all' && <CoinsTable onCoinSelect={handleCoinSelect} />}
+        {activeTab === 'highlights' && <HighlightsSection onCoinSelect={handleCoinSelect} />}
+        {/* Add other tab pages here */}
       </main>
 
       {/* Coin Details Modal */}
@@ -92,16 +103,16 @@ const DashboardContent: React.FC = () => {
       />
 
       {/* Footer */}
-      <footer className="bg-white border-t border-gray-200 mt-16">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-          <div className="text-center space-y-4">
+      <footer className="mt-16 bg-white border-t border-gray-200">
+        <div className="px-4 py-8 mx-auto max-w-7xl sm:px-6 lg:px-8">
+          <div className="space-y-4 text-center">
             <p className="text-gray-600">
               Data provided by{' '}
               <a
                 href="https://www.coingecko.com"
                 target="_blank"
                 rel="noopener noreferrer"
-                className="text-green-600 hover:text-green-700 font-medium"
+                className="font-medium text-green-600 hover:text-green-700"
               >
                 CoinGecko API
               </a>
